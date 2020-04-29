@@ -34,8 +34,7 @@ julia> readimg("/home/heltonmc/Desktop/Images/Control/11OCT19_Series015_location
 '''
 """
 function readimg(filename::String)
-    img::Array{Float64} = load(filename)
-    img = convert(Array{Float64},img)
+    img::Array{Float64} = load(filename) .|> float64
     img = img./maximum(img)
 end
 
@@ -131,3 +130,11 @@ sum(F2)
 end
 =#
 end
+
+
+function denoiseimg(img)
+    
+    kernel = ones(3, 3)./9 # mean filter
+    denoised_img = imfilter(img, kernel)
+    assess(PSNR(),b,img)
+    assess(SSIM(),b,img)
