@@ -34,7 +34,7 @@ julia> readimg("/home/heltonmc/Desktop/Images/Control/11OCT19_Series015_location
 '''
 """
 function readimg(filename::String)
-    img::Array{Float64} = load(filename) .|> float64
+    img::Array{Float64} = load(filename) .|> Float64
     img = img./maximum(img)
 end
 
@@ -106,7 +106,7 @@ julia> ft_image("/home/heltonmc/Desktop/Images/Control/11OCT19_Series015_locatio
 """
 function ft_image(filename::String)
     img::Array{Float64,2} = readimg(filename)
-    img = img.*windowfunc(size(img,1))
+    img = img.*windowfunc(size(img,1)) .|> Float64
 
     ft = fft(img) |> fftshift
 end
@@ -132,9 +132,11 @@ end
 end
 
 
-function denoiseimg(img)
-    
-    kernel = ones(3, 3)./9 # mean filter
+function denoiseimg(img,kernel)
+
+    #kernel = ones(3, 3)./9 # mean filter
     denoised_img = imfilter(img, kernel)
-    assess(PSNR(),b,img)
-    assess(SSIM(),b,img)
+    assess(PSNR(),denoised_img,img)
+    assess(SSIM(),denoised_img,img)
+    return denoised_img, heatmap(convert(Array{Float64},denoised_img))
+end
