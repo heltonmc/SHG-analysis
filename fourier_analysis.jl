@@ -7,7 +7,7 @@ Standard Library module to load and take fourier transform of Second Harmonic Im
 
 module FT_SHG
 
-using Images,FFTW, DSP, Statistics
+using Images,FFTW, DSP, Statistics, ImageFiltering, ImageQualityIndexes
 
 export readimg, windowfunc, ft_image
 
@@ -134,9 +134,26 @@ end
 
 function denoiseimg(img,kernel)
 
-    #kernel = ones(3, 3)./9 # mean filter
-    denoised_img = imfilter(img, kernel)
+    #kernel = ones(5, 5)./9 # mean filter
+    denoised_img = imfilter(img, centered(kernel))
     assess(PSNR(),denoised_img,img)
     assess(SSIM(),denoised_img,img)
-    return denoised_img, heatmap(convert(Array{Float64},denoised_img))
+
+    for i in eachindex(denoised_img)
+        tol = 0.54
+        if abs(denoised_img[i]) < tol
+            denoised_img[i] = 0
+        else
+            denoised_img[i] = 1
+        end
+
+    end
+    return denoised_img
 end
+
+
+
+kernel_x = [1 0 -1; 2 0 -2;1 0 -1]
+kernel_y = [1 2 1; 0 0 0; -1 -2 -1]
+sobel_x = imfilter(img, centered(kernel_x))
+grad = imfilter(sobel_x, kernel')
