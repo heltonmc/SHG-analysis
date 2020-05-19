@@ -177,6 +177,15 @@ function laplacian(f)
     return ∇²
 end
 
+function laplacian1(img)
+    gx, gy = gradient_image(img)
+    gxx = gradient_image(gx)[1]
+    gyy = gradient_image(gy)[2]
+
+    ∇²f = gxx .+ gyy
+end
+
+
 
 
 function denoiseimg(img,kernel)
