@@ -132,6 +132,53 @@ end
 end
 
 
+background_noise = maximum(image[1:100]) # what's a better way to determine the background noise of an image??
+
+for i in eachindex(image)
+    if image[i] < 3*background_noise
+        image[i] = 0
+    end
+end
+
+
+function gradient_image(img)
+
+    grad_x = zeros(size(img)[1],size(img)[2])
+    n = size(img)[2]
+    #h = Vector(1:1:size(img)[2])
+
+    grad_x[:,1] = (img[:,2] - img[:,1])/(1)#(h[2]-h[1])
+    grad_x[:,n]= (img[:,n] - img[:,n-1])/(1)#(h[end]-h[end-1])
+
+    grad_x[:,2:n-1] = (img[:,3:n] - img[:,1:n-2]) ./ 2#(h[3:n] - h[1:n-2])
+
+
+    grad_y = zeros(size(img)[1],size(img)[2])
+    n = size(img)[1]
+    #h = Vector(1:1:size(img)[1])
+
+    grad_y[1,:] = (img[2,:] - img[1,:])/1#(h[2]-h[1])
+    grad_y[n,:]= (img[n,:] - img[n-1,:])/1#(h[end]-h[end-1])
+
+    grad_y[2:n-1,:] = (img[3:n,:] - img[1:n-2,:]) ./ 2#(h[3:n] - h[1:n-2])
+
+    return grad_x,grad_y
+end
+
+
+gx, gy = gradient_image(img)
+angles = rad2deg.(atan.(gy ./ gx))
+
+function laplacian(f)
+    ∇² = zero(f)
+    for y = 2:size(f,2) - 1, x = 2:size(f,1)-1
+        ∇²[x,y] = f[x-1,y] + f[x+1,y] +f[x,y-1] +f[x,y+1] -4f[x,y]
+    end
+    return ∇²
+end
+
+
+
 function denoiseimg(img,kernel)
 
     #kernel = ones(5, 5)./9 # mean filter
@@ -157,3 +204,14 @@ kernel_x = [1 0 -1; 2 0 -2;1 0 -1]
 kernel_y = [1 2 1; 0 0 0; -1 -2 -1]
 sobel_x = imfilter(img, centered(kernel_x))
 grad = imfilter(sobel_x, kernel')
+
+
+
+
+cd("/home/heltonmc/Desktop/Images/65% Force Deficit/")
+imgdir = readdir()
+FD65 = []
+
+for n in imgdir
+    push!(FD65,sum(abs.(ft_image(n))))
+end
