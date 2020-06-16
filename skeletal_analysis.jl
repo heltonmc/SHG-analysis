@@ -1,6 +1,6 @@
 #here is the OMI analysis file
 
-
+using FFTW, StatsBase, Plots, ImageView, Images, OffsetArrays, CoordinateTransformations, Dierckx
 
 ##### load image #####
 
@@ -47,7 +47,7 @@ function center_img(img)
 end
 
 
-#get index values of local maximums of a column
+#get sarcomere length estimates from local maximums of columns
 function get_sarclength(rot_img)
 
     sl_data = rot_img
