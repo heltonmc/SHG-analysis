@@ -31,6 +31,31 @@ function ft_filter(filename::String)
 
     #take inverse fourier transform
     img_processed = abs.(ifft(ft))
+end
+
+
+function center_img(img)
+    kernel = ones(5, 5)./9
+    dimg = imfilter(img,centered(kernel))
+    gy, gx = imgradients(dimg,KernelFactors.ando5)
+    angles = rad2deg.(atan.(gx ./ gy))
+
+    θ =  mode(round.(angles,digits =0))
+    tfm = recenter(RotMatrix(deg2rad(θ)),[size(img)[1]/2,size(img)[1]/2])
+    rot_img = warp(img, tfm)
+end
+
+
+#get index values of local maximums of a column
+locmax = findlocalmaxima(img[:,col])
+idx = []
+for i in eachindex(locmax)
+    push!(idx,getindex(locmax,i)[1])
+end
+
+
+
+
     heatmap(abs.(img_processed))
 
     #save out file to read into MATLAB if necessary
