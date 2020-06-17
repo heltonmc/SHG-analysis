@@ -46,12 +46,30 @@ function center_img(img)
     return rot_img, θ
 end
 
+function recenter_img(img,θ)
+    b = axes(img)[1]
+    c = []
+    for i in b
+       push!(c,i)
+     end
+     b1 = axes(img)[2]
+     c1 = []
+     for i in b1
+        push!(c1,i)
+      end
+      in1 = c[Int(floor(length(c)/2))]
+      in2 = c[Int(floor(length(c1)/2))]
+
+    tfm = recenter(RotMatrix(deg2rad(-θ)),[in1,in2])
+    rot_img = warp(img, tfm)
+end
+
 
 #get sarcomere length estimates from local maximums of columns
 function get_sarclength(rot_img)
 
-    sl_data = rot_img
-    for in_col in axes(rot_img)[1]
+    sl_data = similar(rot_img)
+    for in_col in axes(rot_img)[2]
 
         darray = rot_img[:,in_col]
 
@@ -93,11 +111,19 @@ function get_sarclength(rot_img)
 return sl_data
 end
 
-
+Sarcomere Length (μm)
 # this is a change
+function main_function(filename)
 
+    img = ft_filter(filename)
+    rot_img, theta = center_img(img)
+    sl = get_sarclength(rot_img)
+    sl2 = recenter_img(sl,theta)
+    replace!(sl2, NaN=> 0)
+    sl2 = sl2[1:1024,1:1024]
+end
 
-
+#heatmap(sl2,yflip=true)
 #    heatmap(abs.(img_processed))
 
     #save out file to read into MATLAB if necessary
