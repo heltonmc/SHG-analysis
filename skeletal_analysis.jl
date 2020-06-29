@@ -111,7 +111,7 @@ function get_sarclength(rot_img)
 return sl_data
 end
 
-Sarcomere Length (μm)
+#Sarcomere Length (μm)
 # this is a change
 function main_function(filename)
 
@@ -130,4 +130,31 @@ end
 #    writedlm("45%_15OCT19_Series031_location2_1xzoom_ch01.csv", img_processed, ',')
 
 
-#THIS IS A TEST BY SAM
+function meanpos(a)
+        posMean = mean(a[a .> 0])
+        return posMean
+end
+
+function remove_shade!(img) #current fxn
+    siz = size(img)
+    shade = zeros(siz[1], siz[2])
+    region = ones(9, 9)./81
+    dimg = imfilter(img,centered(region))
+    typical = quantile(img[:], 0.3)
+    for i in eachindex(img)
+        if dimg[i] < typical
+        shade[i] = img[i]
+        #img[i] *= 1.2
+        end
+    end
+    avg = (meanpos(shade))
+    for i in eachindex(shade)
+        if shade[i] > 1.2*avg
+            img[i] *= 1.5
+        end
+        if shade[i] < 0.6*avg && shade[i] > 0
+            img[i] *= 0.5
+        end
+    end,
+    return img
+end
