@@ -155,20 +155,17 @@ end
 
 function count_dam(test, count_dmg, count_edge, count_norm)
 
-    for in_col in axes(test)[2]
-        test2 = test[:,in_col]
-
-        for i in eachindex(test2)
-            if test2[i] < 0.0
+        for i in eachindex(test)
+            if test[i] < 0.0
                 count_dmg = count_dmg + 1;
-            elseif test2[i] == 0.0
+            elseif test[i] == 0.0
                 count_edge = count_edge + 1;
-            elseif test2[i] > 0.0
+            elseif test[i] > 0.0
                 count_norm = count_norm + 1;
+                test[i] = 1; #binarize map for presentation
             end
         end
-    end
-    return count_dmg, count_edge, count_norm
+    return test, count_dmg, count_edge, count_norm
 end
 
 
@@ -192,16 +189,12 @@ function main_function(filename)
     replace!(sl2, NaN=> 0)
     sl2 = sl2[1:1024,1:1024]
     dmg = damage_kernel(sl2)
-    count_dmg = 0;
-    count_norm = 0;
-    count_edge = 0;
-    cnt_dmg, cnt_edge, cnt_norm = count_dam(dmg, count_dmg, count_edge, count_norm)
+    count_dmg, count_norm, count_edge = 0,0,0;
+    binary_map, cnt_dmg, cnt_edge, cnt_norm = count_dam(dmg, count_dmg, count_edge, count_norm)
+    heatmap(binary_map) #binary map (healthy vs. damaged) for presentation
     damage_perc = perc_dam(dmg, cnt_dmg, cnt_edge, cnt_norm)
 
 end
-
-#heatmap(sl2,yflip=true)
-#    heatmap(abs.(img_processed))
 
     #save out file to read into MATLAB if necessary
 #    writedlm("45%_15OCT19_Series031_location2_1xzoom_ch01.csv", img_processed, ',')
